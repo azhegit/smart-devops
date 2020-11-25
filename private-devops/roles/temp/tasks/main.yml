@@ -1,0 +1,4 @@
+---
+# author: wzq
+- include_tasks: '{{installer_tmp}}.yml'
+  name: '{{installer_tmp}} software'

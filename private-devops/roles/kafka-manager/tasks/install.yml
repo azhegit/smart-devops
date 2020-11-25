@@ -1,0 +1,8 @@
+---
+# Created by azhe on 2020-08-17 16:33
+
+- include_tasks: 'install_soft.yml'
+  name: '{{installer_kafka_manager}} | 安装task脚本'
+
+- include_tasks: 'init_config.yml'
+  name: '{{installer_kafka_manager}} | 初始化配置'

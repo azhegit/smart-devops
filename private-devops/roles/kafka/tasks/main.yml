@@ -1,0 +1,4 @@
+---
+# Created by azhe on 2020-08-17 11:20
+- include_tasks: '{{installer_kafka}}.yml'
+  name: '{{installer_kafka}} software'

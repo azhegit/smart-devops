@@ -1,0 +1,33 @@
+---
+# Created by azhe on 2020-08-17 16:33
+
+- name: configure | Set kafka-manager init script.
+  template:
+    dest: "{{soft_conf}}"
+    src: application.conf.j2
+
+- name: "{{installer_kafka_manager}} | Create {{soft_name}} data Directory."
+  file: path={{ item }} state=directory owner={{ ansible_ssh_user }} group={{ ansible_ssh_user }}
+  with_items:
+   - "{{ soft_datalogdir }}"
+
+- name: "{{installer_kafka_manager}} | start {{soft_name}}"
+  shell: "rm -f $KAFKA_MANAGER_HOME/RUNNING_PID"
+  register: result
+  become: false
+
+- name: "{{installer_kafka_manager}} | start {{soft_name}}"
+  shell: "nohup $KAFKA_MANAGER_HOME/bin/kafka-manager -Dhttp.port=8089 {{sasl_config}} >> $KAFKA_MANAGER_HOME/logs/kafka_manager.out 2>&1 &"
+  register: result
+  become: false
+
+#- debug: var=result
+
+- name: "{{installer_kafka_manager}} | 查询{{soft_name}} pid"
+  shell: "ps -aux | grep {{soft_pid_name}} |grep -v grep| awk '{print $2}'"
+  register: pid_result
+
+- name: "{{installer_kafka_manager}} | 检查结果"
+  debug:
+    msg: " {{soft_name}} 已经启动 ，pid:{{ pid_result.stdout_lines }}"
+  when: pid_result.stdout_lines is defined

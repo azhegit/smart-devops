@@ -1,0 +1,11 @@
+#!/bin/bash
+
+docker stop grafana
+docker rm grafana
+docker run -d --restart always \
+  -p 3000:3000 \
+  --name=grafana \
+  -e "GF_SERVER_ROOT_URL=http://{{ ansible_ssh_host }}" \
+  -e "GF_SECURITY_ADMIN_PASSWORD=admin" \
+  -v {{grafana_data_path}}:/var/lib/grafana \
+  grafana/grafana

@@ -1,0 +1,37 @@
+---
+# Created by azhe on 2020-08-18 18:55
+
+- name: "{{installer_docker}} | 查询{{soft_name}} pid"
+  shell: "docker stop $(docker ps -q)"
+  ignore_errors: True
+
+- name: "{{installer_docker}} | 查询{{soft_name}} pid"
+  shell: "ps -aux | grep {{soft_name}} |grep -v grep| awk '{print $2}'"
+  register: pid_result
+  ignore_errors: True
+
+- name: "{{installer_docker}} | 停止{{soft_name}}"
+  service:
+    name: '{{ soft_name }}'
+    state: stopped
+    enabled: no
+  when: pid_result.stdout_lines|length>0
+
+- name: timed wait
+  pause: seconds=5
+
+- name: "{{installer_docker}} | 删除 {{image_home}} 镜像目录"
+  file: path={{item}} state=absent
+  with_items:
+    - "{{image_home}}"
+
+- name: "{{installer_docker}} | 删除docker脚本"
+  shell: "rm -rf {{bash_path}}/{{soft_name}}"
+
+- name: "{{installer_docker}} | 检查{{soft_profile}}环境变量是否存在"
+  stat: path={{soft_profile}}
+  register: soft_profile_result
+
+- name: "{{installer_docker}} | 删除 {{soft_name}} 环境变量 {{soft_profile}}"
+  file: path={{soft_profile}} state=absent
+  when: soft_profile_result.stat.exists

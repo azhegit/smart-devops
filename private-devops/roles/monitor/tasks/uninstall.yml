@@ -1,0 +1,24 @@
+---
+# Created by azhe on 2020-08-19 16:37
+
+- name: "{{installer_kafka}} | 批量停止exporter"
+  shell: "ps -aux | grep {{item}} |grep -v grep| awk '{print $2}' | xargs kill -9"
+  ignore_errors: True
+  with_items:
+    - 'node_exporter'
+    - 'kafka_exporter'
+
+- name: "{{installer_monitor}} | 停止monitor相关 "
+  shell: '{{item}}'
+  with_items:
+    - 'ssh {{ansible_ssh_host}} stop-prometheus.sh'
+    - 'ssh {{ansible_ssh_host}} stop-grafana.sh'
+  ignore_errors: True
+  become: false
+  when: inventory_hostname == groups['monitor'][0]
+
+- name: "{{installer_monitor}} | 删除 {{soft_home}} 目录"
+  file: path={{soft_home}} state=absent
+
+- name: "{{installer_monitor}} | 删除 {{soft_name}} 环境变量 {{soft_profile}}"
+  file: path={{soft_profile}} state=absent

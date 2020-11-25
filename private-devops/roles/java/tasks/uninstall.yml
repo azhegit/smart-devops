@@ -1,0 +1,27 @@
+---
+# Created by azhe on 2020-03-13 19:07
+
+
+- name: "{{installer_java}} | 检查 {{ soft_name }} 安装目录 {{parent_home}} 是否存在"
+  stat: path={{ parent_home }}
+  register: parent_home_result
+
+- name: "{{installer_java}} | 删除 {{parent_home}} 目录"
+  file: path={{parent_home}} state=absent
+  when: parent_home_result.stat.exists
+
+- name: "{{installer_java}} | 检查 {{soft_profile}} 环境变量是否存在"
+  stat: path={{soft_profile}}
+  register: soft_profile_result
+
+- name: "{{installer_java}} | 删除 {{soft_name}} 环境变量 {{soft_profile}}"
+  file: path={{soft_profile}} state=absent
+  when: soft_profile_result.stat.exists
+
+- name: "{{installer_java}} | {{ soft_name }} version"
+  command: '{{soft_home}}/bin/java -version'
+  register: result
+  changed_when: false
+  ignore_errors: True
+
+- debug: var=result.stderr_lines

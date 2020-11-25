@@ -1,0 +1,20 @@
+---
+# Created by azhe on 2020-08-14 20:55
+
+soft_name: zookeeper
+install_path: "/opt"
+soft_version: zookeeper-3.4.6
+
+parent_home: "{{install_path}}/{{soft_name}}"
+soft_home: "{{parent_home}}/{{soft_version}}"
+
+soft_profile: "/etc/profile.d/zookeeper_home.sh"
+soft_file: "zookeeper-3.4.6.tar.gz"
+
+
+soft_datadir: "{{soft_home}}/data"
+soft_datalogdir: "{{soft_home}}/logs"
+soft_port: 2181
+
+
+installer_zookeeper: install

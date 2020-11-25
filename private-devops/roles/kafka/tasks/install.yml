@@ -1,0 +1,19 @@
+---
+# Created by azhe on 2020-08-17 11:20
+
+- include_tasks: 'install_soft.yml'
+  name: '{{installer_kafka}} | 安装 {{soft_name}} 脚本'
+
+- name: '{{installer_kafka}} | 初始化 {{soft_name}} 配置'
+  include_tasks: 'init_config.yml'
+
+- name: "{{installer_kafka}} | 上传kafka-tools"
+  include_tasks: install_kafka_tools.yml
+
+- name: "{{installer_kafka}} | 开启sasl，修改相关配置"
+  include_tasks: init_sasl_config.yml
+  when: sasl_enable == 'true'
+
+- include_tasks: 'start_soft.yml'
+  name: '{{installer_kafka}} | 启动 {{soft_name}} 脚本'
+

@@ -1,0 +1,29 @@
+- name: hive
+  hosts: hive
+  become: true
+  roles:
+    - role: hive
+
+- name: hadoop
+  hosts: hadoop
+  become: true
+  roles:
+    - role: hadoop
+
+#- name: zookeeper-docker
+#  hosts: zookeeper_docker
+#  become: true
+#  roles:
+#    - role: zookeeper-docker
+#
+#- name: ssh
+#  hosts: ssh
+#  become: true
+#  roles:
+#    - role: ssh
+#
+#- name: hostname
+#  hosts: hostname
+#  become: true
+#  roles:
+#    - role: hostname

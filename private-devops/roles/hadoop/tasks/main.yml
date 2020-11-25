@@ -1,0 +1,4 @@
+---
+# author: wzq
+- include_tasks: '{{installer_hadoop}}.yml'
+  name: '{{installer_hadoop}} software'

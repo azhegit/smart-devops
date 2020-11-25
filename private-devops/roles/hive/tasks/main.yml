@@ -1,0 +1,4 @@
+---
+# author: wzq
+- include_tasks: '{{installer_hive}}.yml'
+  name: '{{installer_hive}} software'

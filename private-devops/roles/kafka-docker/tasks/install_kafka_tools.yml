@@ -1,0 +1,23 @@
+---
+# Created by azhe on 2020-08-17 11:20
+
+- name: "{{installer_kafka_docker}} | 如果目录不存在创建 创建 {{kafka_tools_path}} 目录"
+  copy:
+    src: "{{basic_files_path}}/{{soft_name}}/{{kafka_tools_name}}"
+    dest: "{{ install_path }}"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0755
+
+- name: "{{installer_kafka_docker}} | 配置 kafka_tools 环境,环境变量写入{{kafka_tools_profile}}"
+  template:
+    src: kafka_tools_profile.sh.j2
+    dest: '{{kafka_tools_profile}}'
+    mode: 0644
+
+- name: "{{installer_kafka_docker}} | 配置 kafka_tools 环境文件 ENV_KAFKA_HOST"
+  template:
+    src: ENV_KAFKA_HOST.j2
+    dest: '{{kafka_tools_path}}/ENV_KAFKA_HOST'
+  become: false
+  ignore_errors: True

@@ -1,0 +1,112 @@
+---
+# Created by azhe on 2020-08-19 16:37
+
+- name: "{{installer_monitor}} | 创建 {{image_home}},{{ soft_home }} 目录"
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: '{{ansible_user}}'
+    group: '{{ansible_user}}'
+  with_items:
+    - "{{ image_home }}"
+    - "{{ soft_home }}"
+    - "{{ soft_home }}/logs"
+    - "{{ soft_home }}/docker_bin"
+
+- name: "{{installer_monitor}} | 配置 {{soft_name}} 环境,环境变量写入{{soft_profile}}"
+  template:
+    src: soft_profile.sh.j2
+    dest: '{{soft_profile}}'
+    mode: 0644
+
+- name: "{{installer_monitor}} | 复制exporter到 {{bash_path}}"
+  copy:
+    src: '{{basic_files_path}}/exporter/node_exporter'
+    dest: "{{ soft_home }}/docker_bin/"
+    mode: 0755
+
+- block:
+  - name: "{{installer_monitor}} | 准备 {{soft_name}} 镜像"
+    copy:
+      src: '{{basic_files_path}}/{{soft_name}}/{{item}}'
+      dest: "{{image_home}}"
+      owner: "{{ ansible_ssh_user }}"
+      group: "{{ ansible_ssh_user }}"
+      mode: 0755
+    with_items:
+      - grafana.gz
+      - prometheus.gz
+
+  - name: "{{installer_monitor}} | 导入镜像"
+    shell: 'docker load < {{image_home}}/{{item}}'
+    with_items:
+      - grafana.gz
+      - prometheus.gz
+
+  - name: "{{installer_monitor}} | 创建 {{soft_home}}/docker_bin 目录"
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: "{{ ansible_ssh_user }}"
+      group: "{{ ansible_ssh_user }}"
+    with_items:
+      - "{{ soft_home }}/data"
+      - "{{ soft_home }}/config"
+
+  - name: "{{installer_monitor}} | 上传启动脚本."
+    template:
+      dest: "{{ soft_home }}/docker_bin/{{item}}"
+      mode: 0700
+      src: "{{item}}.j2"
+      owner: "{{ ansible_ssh_user }}"
+      group: "{{ ansible_ssh_user }}"
+    with_items:
+      - start-grafana.sh
+      - start-prometheus.sh
+      - stop-grafana.sh
+      - stop-prometheus.sh
+
+  - name: "{{installer_monitor}} | 配置 prometheus 配置,配置信息写入{{config_path}}"
+    template:
+      src: prometheus.yml
+      dest: '{{config_path}}/'
+    become: false
+
+  - name: "{{installer_monitor}} | 创建 {{prometheus_data_path}} 目录"
+    file:
+      path: "{{ prometheus_data_path }}"
+      state: directory
+      owner: 65534
+      group: 65534
+
+  - name: "{{installer_monitor}} | 复制exporter到 {{bash_path}}"
+    copy:
+      src: '{{basic_files_path}}/exporter/kafka_exporter-master'
+      dest: "{{ soft_home }}/docker_bin/"
+      mode: 0755
+
+  - name: "{{installer_monitor}} | 创建 {{grafana_data_path}} 目录"
+    file:
+      path: "{{ grafana_data_path }}"
+      state: directory
+      mode: 0777
+      owner: '{{ansible_user}}'
+      group: '{{ansible_user}}'
+
+  - name: "{{installer_monitor}} | 启动{{soft_name}} "
+    shell: '{{item}}'
+    become: false
+    with_items:
+      - start-grafana.sh
+      - start-prometheus.sh
+
+  - name: "{{installer_monitor}} | 启动node_exporter "
+    shell: "nohup kafka_exporter-master --kafka.server={{groups['kafka_docker'][0]}}:9092 >> $MONITER_HOME/logs/kafka_exporter.out 2>&1 &"
+    become: false
+
+  when: inventory_hostname == groups['monitor'][0]
+
+- name: "{{installer_monitor}} | 启动node_exporter "
+  shell: 'nohup node_exporter --web.listen-address=":9100" >> $MONITER_HOME/logs/node_exporter.out 2>&1 &'
+  become: false

@@ -1,0 +1,29 @@
+<configuration>
+    <property>
+        <!--集群服务的ID-->
+        <name>fs.defaultFS</name>
+        <value>hdfs://{{ dfs_nameservices }}</value>
+    </property>
+    <property>
+        <!--Zookeeper的节点-->
+        <name>ha.zookeeper.quorum</name>
+        <value>{% if groups['zookeeper'] is defined %}
+{% for host in groups['zookeeper']  %}{{ hostvars[host].ansible_ssh_host }}:{{ zookeeper_client_port|default('2181') }}{% if not loop.last %},{% endif %}{% endfor %}
+{% else %}
+{% for host in groups['zookeeper_docker']  %}{{ hostvars[host].ansible_ssh_host }}:{{ zookeeper_client_port|default('2181') }}{% if not loop.last %},{% endif %}{% endfor %}
+{% endif %}</value>
+    </property>
+    <property>
+        <!--Hadoop tmp数据的目录-->
+        <name>hadoop.tmp.dir</name>
+        <value>{{ hadoop_data_home }}</value>
+    </property>
+    <property>
+        <name>hadoop.proxyuser.{{ ansible_ssh_user }}.hosts</name>
+        <value>*</value>
+    </property>
+    <property>
+        <name>hadoop.proxyuser.{{ ansible_ssh_user }}.groups</name>
+        <value>*</value>
+    </property>
+</configuration>

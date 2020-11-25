@@ -1,0 +1,16 @@
+---
+# author: wzq
+
+
+soft_name: mysql
+
+soft_version: 5.7.22
+
+rpm_path: /home/{{ansible_user}}/.tmp/rpms
+
+soft: ['mysql']
+
+mysql_password: password@123
+
+installer_mysql: install
+

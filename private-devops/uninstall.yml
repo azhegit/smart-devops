@@ -1,0 +1,71 @@
+- name: hive
+  hosts: hive
+  become: true
+  roles:
+    - role: hive
+
+- name: hadoop
+  hosts: hadoop
+  become: true
+  roles:
+    - role: hadoop
+
+- name: mysql
+  hosts: mysql
+  become: true
+  roles:
+    - role: mysql
+
+- name: monitor
+  hosts: all
+  become: true
+  roles:
+    - role: monitor
+
+- name: kafka-manager
+  hosts: kafka_manager
+  become: true
+  roles:
+    - role: kafka-manager
+
+- name: kafka-docker
+  hosts: kafka_docker
+  become: true
+  roles:
+    - role: kafka-docker
+
+- name: zookeeper-docker
+  hosts: zookeeper_docker
+  become: true
+  roles:
+    - role: zookeeper-docker
+
+- name: docker
+  hosts: docker
+  become: true
+  roles:
+    - role: docker
+
+- name: rpms
+  hosts: rpms
+  become: true
+  roles:
+    - role: rpms
+
+- name: java
+  hosts: java
+  become: true
+  roles:
+    - role: java
+
+- name: ssh
+  hosts: ssh
+  become: true
+  roles:
+    - role: ssh
+
+- name: hostname
+  hosts: hostname
+  become: true
+  roles:
+    - role: hostname

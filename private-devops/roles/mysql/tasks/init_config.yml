@@ -1,0 +1,55 @@
+---
+# Created by azhe on 2020-08-17 16:33
+
+
+
+- name: "{{installer_mysql}} | 检查mysql是否安装."
+  shell: rpm -qa | grep mysql-community-server |wc -l
+  register: isInstalled
+
+- debug: var=isInstalled.stdout
+
+- block:
+  - name: "{{installer_mysql}} | 启动 {{soft_name}}"
+    service:
+      name: mysqld
+      state: started
+      enabled: yes
+
+  - name: "{{installer_mysql}} | 添加密码校验关闭 "
+    lineinfile:
+      dest: '/etc/my.cnf'
+      insertafter: "\\[mysqld\\]"
+      line: 'validate_password=OFF'
+      state: present
+
+  - name: "{{installer_mysql}} | 重新启动 {{soft_name}}"
+    service:
+      name: mysqld
+      state: restarted
+      enabled: yes
+
+  - name: "{{installer_mysql}} | 获取初始密码"
+    shell: "cat /var/log/mysqld.log | grep root@localhost: | cut -d \" \" -f 11"
+    register: init_password
+
+  - debug: var=init_password.stdout
+
+  - name: "{{installer_mysql}} | 修改密码"
+    shell: "{{item}}"
+    with_items:
+      - "mysql -uroot -p'{{init_password.stdout}}' -e \"alter user 'root'@'localhost' identified by '{{mysql_password}}';\"  --connect-expired-password;"
+      - "mysql -uroot -p'{{mysql_password}}' -e \"GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '{{mysql_password}}' WITH GRANT OPTION;\"  --connect-expired-password;"
+      - "mysql -uroot -p'{{mysql_password}}' -e 'flush privileges;' --connect-expired-password;"
+    ignore_errors:  yes
+    when: init_password.stdout_lines|length>0
+
+  - name: "{{installer_mysql}} | 添加."
+    template:
+      dest: "~/.{{item}}"
+      src: "{{item}}.j2"
+    become: false
+    with_items:
+      - my.cnf
+
+  when: not isInstalled.stdout=="0"

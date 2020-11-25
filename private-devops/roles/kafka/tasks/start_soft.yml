@@ -1,0 +1,27 @@
+---
+# Created by azhe on 2020-08-17 11:20
+
+- name: "{{installer_kafka}} | start {{soft_name}}"
+  shell: "nohup $KAFKA_HOME/bin/kafka-server-start.sh $KAFKA_HOME/config/server.properties >> $KAFKA_HOME/logs/kafka.out 2>&1 &"
+  become: false
+
+- name: "{{installer_kafka}} | 查询{{soft_name}} pid"
+  shell: "ps -aux | grep {{soft_pid_name}} |grep -v grep| awk '{print $2}'"
+  register: pid_result
+
+- name: "{{installer_kafka}} | 检查结果"
+  debug:
+    msg: " {{soft_name}} 已经启动 ，pid:{{ pid_result.stdout_lines }}"
+  when: pid_result.stdout_lines is defined
+
+- name: "{{installer_kafka}} | 查询{{soft_name}} 测试脚本 pid"
+  shell: "ps -aux | grep ProducerPerformance |grep -v grep| awk '{print $2}'"
+  register: perf_pid_result
+  ignore_errors: True
+  run_once: true
+
+- name: "{{installer_kafka}} | 创建 test topic,启动 消费者脚本"
+  shell: "kafka-topic-create.sh test 1 1;sleep 3;kafka-perf-test.sh test 9000 5;sleep 5; nohup consumer-test.sh >/dev/null 2>&1 &"
+  become: false
+  run_once: true
+  when: perf_pid_result.stdout_lines| length<1

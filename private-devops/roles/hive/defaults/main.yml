@@ -1,0 +1,22 @@
+---
+# author: wzq
+
+
+soft_name: hive
+install_path: "/opt"
+
+soft_version: 2.3.6
+
+local_file_path: "{{basic_files_path}}/{{soft_name}}/{{soft_version}}/apache-hive-{{soft_version}}-bin.tar.gz"
+
+mysql_driver_path: "{{basic_files_path}}/{{soft_name}}/mysql-connector-java-5.1.36.jar"
+
+parent_home: "{{install_path}}/{{soft_name}}"
+soft_home: "{{parent_home}}/apache-hive-{{soft_version}}-bin"
+
+soft_profile: "/etc/profile.d/hive_home.sh"
+
+mysql_hive_database: k8s_hive
+
+
+installer_hive: install

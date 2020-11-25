@@ -1,0 +1,13 @@
+---
+# Created by azhe on 2020-03-13 19:07
+
+
+- name: "{{installer_hostname}} | 修改主机名"
+  hostname: "name={{inventory_hostname}}"
+
+- name: "{{installer_hostname}} | 给机器映射添加到 {{hostnames_file}} "
+  lineinfile:
+    dest: '{{hostnames_file}}'
+    line: "{{hostvars[item].ansible_ssh_host}} {{item}}"
+    state: present
+  with_items: "{{ groups.all }}"

@@ -1,0 +1,28 @@
+---
+# Created by azhe on 2020-08-17 16:33
+
+soft_name: kafka-manager
+install_path: "/opt"
+soft_version: kafka-manager-1.3.3.23
+
+soft_pid_name: kafka-manager
+parent_home: "{{install_path}}/{{soft_name}}"
+soft_home: "{{parent_home}}/{{soft_version}}"
+
+soft_profile: "/etc/profile.d/kafka_manager_home.sh"
+soft_file: "kafka-manager-1.3.3.23.zip"
+
+soft_port: 8089
+soft_conf: "{{ soft_home }}/conf/application.conf"
+
+soft_datadir: "{{soft_home}}/data"
+soft_datalogdir: "{{soft_home}}/logs"
+
+sasl_enable: false
+sasl_config: "{% if sasl_enable=='true' %} -Djava.security.auth.login.config=$KAFKA_HOME/config/kafka_client_jaas.conf {% else %} {% endif %}"
+
+kafka_manager_auth: 'false'
+kafka_manager_auth_user: admin
+kafka_manager_auth_pass: adminpwd
+
+installer_kafka_manager: install

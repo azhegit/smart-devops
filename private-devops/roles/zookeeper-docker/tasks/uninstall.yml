@@ -1,0 +1,22 @@
+---
+# Created by azhe on 2020-08-19 16:37
+
+- name: "{{installer_zookeeper_docker}} | 停止{{soft_name}} "
+  shell: 'stop-zookeeper.sh'
+  become: false
+  ignore_errors: True
+
+- name: "{{installer_zookeeper_docker}} | 删除 {{soft_home}} 目录"
+  file: path={{soft_home}} state=absent
+  file: path={{item}} state=absent
+  with_items:
+   - "{{soft_home}}"
+#   - "{{image_home}}/{{soft_file}}"
+
+- name: "{{installer_zookeeper_docker}} | 检查{{soft_profile}}环境变量是否存在"
+  stat: path={{soft_profile}}
+  register: soft_profile_result
+
+- name: "{{installer_zookeeper_docker}} | 删除 {{soft_name}} 环境变量 {{soft_profile}}"
+  file: path={{soft_profile}} state=absent
+  when: soft_profile_result.stat.exists

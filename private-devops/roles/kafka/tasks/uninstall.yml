@@ -1,0 +1,57 @@
+---
+# Created by azhe on 2020-08-17 11:20
+
+
+- name: "{{installer_kafka}} | 查询{{soft_name}} pid"
+  shell: "ps -aux | grep {{soft_pid_name}} |grep -v grep| awk '{print $2}'"
+  register: pid_result
+  ignore_errors: True
+
+- name: "{{installer_kafka}} | 停止{{soft_name}}"
+  shell: 'kill -9 {{item}}'
+  when: pid_result.stdout_lines is defined
+  with_items: "{{pid_result.stdout_lines}}"
+
+- name: "{{installer_kafka}} | 查询 测试发送端 pid"
+  shell: "ps -aux | grep {{item}} |grep -v grep| awk '{print $2}' | xargs kill -9"
+  run_once: true
+  ignore_errors: True
+  with_items:
+    - 'ProducerPerformance'
+    - 'ConsoleConsumer'
+    - 'consumer-test.sh'
+
+- name: "{{installer_kafka}} | 删除数据目录"
+  file: path={{soft_datadir}} state=absent
+
+- name: "{{installer_kafka}} | 检查 {{ soft_name }} 安装目录 {{parent_home}} 是否存在"
+  stat: path={{ parent_home }}
+  register: parent_home_result
+
+- name: "{{installer_kafka}} | 删除 {{parent_home}} 目录"
+  file: path={{parent_home}} state=absent
+  when: parent_home_result.stat.exists
+
+- name: "{{installer_kafka}} | 检查{{soft_profile}}环境变量是否存在"
+  stat: path={{soft_profile}}
+  register: soft_profile_result
+
+- name: "{{installer_kafka}} | 删除 {{soft_name}} 环境变量 {{soft_profile}}"
+  file: path={{soft_profile}} state=absent
+  when: soft_profile_result.stat.exists
+
+- name: "{{installer_kafka}} | 检查 {{ kafka_tools_name }} 安装目录 {{kafka_tools_path}} 是否存在"
+  stat: path={{ kafka_tools_path }}
+  register: parent_home_result
+
+- name: "{{installer_kafka}} | 删除 {{kafka_tools_path}} 目录"
+  file: path={{kafka_tools_path}} state=absent
+  when: parent_home_result.stat.exists
+
+- name: "{{installer_kafka}} | 检查{{kafka_tools_profile}}环境变量是否存在"
+  stat: path={{kafka_tools_profile}}
+  register: soft_profile_result
+
+- name: "{{installer_kafka}} | 删除 {{soft_name}} 环境变量 {{kafka_tools_profile}}"
+  file: path={{kafka_tools_profile}} state=absent
+  when: soft_profile_result.stat.exists

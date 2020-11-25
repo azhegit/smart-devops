@@ -1,0 +1,59 @@
+---
+# Created by azhe on 2020-03-13 19:07
+
+
+- name: 检查 {{ rpm_path }} 目录是否存在
+  stat: path={{ rpm_path }}
+  register: rpm_path_result
+
+- name: 如果目录不存在创建 {{rpm_path}} 目录
+  become: false
+  file: path={{ rpm_path }} state=directory
+  when: not rpm_path_result.stat.exists
+
+- name: 检查 "{{rpm_path}}/{{soft}}" 目录是否存在
+  stat: path="{{rpm_path}}/{{item}}"
+  with_items:
+    - "{{soft}}"
+  register: soft_path_result
+
+
+- name: 初始化要安装软件
+  set_fact: soft_list=[]
+
+- name: 需要上传的目录
+  set_fact:
+    soft_list: "{{soft_list}} + [ '{{item.item}}' ]"
+  when: not item.stat.exists
+  with_items: "{{soft_path_result.results}}"
+  loop_control:
+    label: "{{item.item}}"
+
+
+- name: 准备 {{soft_list}} 安装目录及脚本
+  become: false
+#  debug: msg={{item}}
+  copy:
+    src: '{{basic_files_path}}/rpms/{{item}}'
+    dest: "{{rpm_path}}"
+    owner: '{{ansible_user}}'
+  with_items:
+    - "{{soft_list}}"
+    - "install-rpms.sh"
+    - "uninstall-rpms.sh"
+  when: not soft_list|length == 0
+
+- debug: var=soft_list
+
+
+- name: 安装 {{soft}}
+  shell: "sh {{rpm_path}}/install-rpms.sh {{rpm_path}}/{{item}}"
+  with_items: "{{soft}}"
+  register: install_soft_result
+
+- name: 安装 {{soft}} 结果
+  debug:
+    msg: "{{item.stdout_lines}}"
+  loop: "{{install_soft_result.results}}"
+  loop_control:
+    label: " {{item.item}}"

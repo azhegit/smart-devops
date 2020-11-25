@@ -1,0 +1,93 @@
+---
+# Created by azhe on 2020-08-14 20:55
+
+#添加ssh-key
+- name: "{{installer_ssh}} | Generate SSH keys."
+  shell: ssh-keygen  -t rsa -f ~/.ssh/id_rsa -N ""
+  args:
+    creates: ~/.ssh/id_rsa
+  become: false
+
+- name: "{{installer_ssh}} | install localhosht ssh key"
+  authorized_key:
+    user: "{{ansible_user}}"
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    state: present
+  register: result
+
+- name: "{{installer_ssh}} | Fetch public ssh keys."
+  shell: cat ~/.ssh/id_rsa.pub
+  register: ssh_keys
+  become: false
+
+- name: "{{installer_ssh}} | Deploy keys on all servers."
+  authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ hostvars[item].ssh_keys.stdout }}"
+    state: present
+  with_items: "{{ groups.all }}"
+  become: false
+
+- name: "{{installer_ssh}} | 执行本机 Make sure the known hosts file exists"
+  file: "path={{ ssh_known_hosts_file }} state=touch"
+  connection: local
+  become: false
+
+- name: "{{installer_ssh}} | 执行本机 Check host name availability"
+  shell: "ssh-keygen -f {{ ssh_known_hosts_file }} -F {{ item }}"
+  with_items: '{{  groups.all }}'
+  register: ssh_known_host_results
+  ignore_errors: yes
+  connection: local
+  become: false
+
+- name: "{{installer_ssh}} | 执行本机 Scan the public key"
+  shell: "{{ ssh_known_hosts_command}} {{ item.item }}"
+  when: item.stdout == ""
+  with_items: "{{ ssh_known_host_results.results }}"
+  register: results
+  connection: local
+  become: false
+
+- name: "{{installer_ssh}} | 执行本机 添加 know_hosts 到 {{ssh_known_hosts_file}} "
+  lineinfile:
+    dest: '{{ssh_known_hosts_file}}'
+    line: "{{item.stdout}}"
+    state: present
+  with_items: "{{results.results}}"
+  when: item.stderr is defined
+  connection: local
+  become: false
+
+
+- name: "{{installer_ssh}} | 远端机器 Make sure the known hosts file exists"
+  file: "path={{ ssh_known_hosts_file }} state=touch"
+  become: false
+
+- name: "{{installer_ssh}} | 远端机器 Check host name availability"
+  shell: "ssh-keygen -f {{ ssh_known_hosts_file }} -F {{ item }}"
+  with_items: '{{  groups.all }}'
+  register: ssh_known_host_results
+  ignore_errors: yes
+  become: false
+
+- name: "{{installer_ssh}} | 远端机器 Scan the public key"
+  shell: "{{ ssh_known_hosts_command}} {{ item.item }}"
+  when: item.stdout == ""
+  with_items: "{{ ssh_known_host_results.results }}"
+  register: results
+  become: false
+
+- name: "{{installer_ssh}} | 远端机器 添加 know_hosts 到 {{ssh_known_hosts_file}} "
+  lineinfile:
+    dest: '{{ssh_known_hosts_file}}'
+    line: "{{item.stdout}}"
+    state: present
+  with_items: "{{results.results}}"
+  when: item.stderr is defined
+  become: false
+
+- name: "{{installer_hadoop}} | 安装telnet"
+  yum:
+     name: ['telnet', 'tree']
+     state: present

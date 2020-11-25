@@ -1,0 +1,40 @@
+---
+# Created by azhe on 2020-08-17 11:20
+
+- name: "{{installer_kafka}} | 检查 {{ soft_name }} 安装目录 {{parent_home}} 是否存在"
+  stat: path={{parent_home}}
+  register: parent_home_result
+
+- name: "{{installer_kafka}} | 如果目录不存在创建 {{parent_home}} 目录"
+  file: path={{ parent_home }} state=directory
+  when: not parent_home_result.stat.exists
+
+- name: "{{installer_kafka}} | 检查 {{soft_home}} 目录是否存在"
+  stat: path={{soft_home}}
+  register: soft_home_result
+
+- name: "{{installer_kafka}} | 解压{{soft_file}}"
+  unarchive:
+    src: "{{basic_files_path}}/{{soft_name}}/{{soft_file}}"
+    dest: "{{parent_home}}"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+  when: not soft_home_result.stat.exists
+
+
+- name: "{{installer_kafka}} | 检查{{soft_profile}}环境变量是否存在"
+  stat: path={{soft_profile}}
+  register: soft_profile_result
+
+- name: "{{installer_kafka}} | 配置 {{soft_name}} 环境,环境变量写入{{soft_profile}}"
+  template:
+    src: soft_profile.sh.j2
+    dest: '{{soft_profile}}'
+    mode: 0644
+  when: not soft_profile_result.stat.exists
+
+- name: "{{installer_kafka}} | 检查 {{soft_home}} 目录是否存在"
+  stat: path={{soft_home}}
+  register: result
+
+- debug: var=result.stat.path

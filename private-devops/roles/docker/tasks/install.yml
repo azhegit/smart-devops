@@ -1,0 +1,96 @@
+---
+# Created by azhe on 2020-08-18 18:55
+
+#- name: "{{installer_docker}} | 查询{{soft_name}} pid"
+#  shell: "ps -aux | grep {{soft_pid_name}} |grep -v grep| awk '{print $2}'"
+#  register: pid_result
+#  ignore_errors: True
+#
+#- name: "{{installer_docker}} | {{soft_name}} 状态"
+#  fail: msg="{{soft_pid_name}} 正在运行"
+#  when: pid_result.stdout_lines | length > 0
+
+- name: "{{installer_kafka_docker}} | 创建 {{image_home}} 目录"
+  file:
+    path: "{{ image_home }}"
+    state: directory
+    mode: 0755
+    owner: '{{ansible_user}}'
+    group: '{{ansible_user}}'
+
+- name: "{{installer_docker}} | 检查 {{ soft_name }} 安装目录 {{parent_home}} 是否存在"
+  stat: path={{ parent_home }}
+  register: parent_home_result
+
+- name: "{{installer_docker}} | 解压{{soft_file}}"
+  unarchive:
+    src: "{{basic_files_path}}/{{soft_name}}/{{soft_file}}"
+    dest: '{{tmp_path}}'
+    list_files: yes
+  async: 0
+  poll: 30
+  when: not parent_home_result.stat.exists
+
+- name: "{{installer_docker}} | 复制脚本到{{bash_path}}"
+  shell: "cp {{ parent_home }}/* {{ bash_path }}/"
+  ignore_errors: True
+
+
+- name: "{{installer_docker}} | 复制docker-compose到 {{bash_path}}"
+  copy:
+    src: '{{basic_files_path}}/{{soft_name}}/docker-compose-Linux-x86_64'
+    dest: "{{bash_path}}/docker-compose"
+    mode: 0755
+    owner: '{{ ansible_user }}'
+    group: '{{ ansible_user }}'
+  ignore_errors: True
+
+
+- name: "{{installer_docker}} | 添加 {{soft_name}} 组"
+  group:
+    name: docker
+    state: present
+
+- name: "{{installer_docker}} | 添加 {{ansible_user}} 到 {{soft_name}} 组"
+  user:
+    name: '{{ansible_user}}'
+    groups: '{{soft_name}}'
+    append: yes
+  register: result
+
+- name: "{{installer_docker}} | 检查{{soft_profile}}环境变量是否存在"
+  stat: path={{soft_profile}}
+  register: soft_profile_result
+
+- name: "{{installer_docker}} | 配置 {{soft_name}} 环境,环境变量写入{{soft_profile}}"
+  template:
+    src: docker.service.j2
+    dest: '{{soft_profile}}'
+    mode: 0644
+  when: not soft_profile_result.stat.exists
+
+- name: "{{installer_docker}} | 检查 {{ soft_name }} 安装目录 {{soft_home}} 是否存在"
+  stat: path={{ soft_home }}
+  register: soft_home_result
+
+- name: "{{installer_docker}} | 如果目录不存在创建 {{soft_home}} 目录"
+  file:
+    path: '{{ soft_home }}'
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  when: not soft_home_result.stat.exists
+
+- name: "{{installer_docker}} | 启动 {{soft_home}}"
+  service:
+    name: '{{ soft_name }}'
+    state: started
+    enabled: yes
+
+- name: "{{installer_docker}} | {{ soft_name }} version"
+  shell: 'docker --version'
+  register: result
+  changed_when: false
+  ignore_errors: True
+
+- debug: var=result.stdout_lines

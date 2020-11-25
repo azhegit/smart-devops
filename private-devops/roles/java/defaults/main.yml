@@ -1,0 +1,14 @@
+---
+# Created by azhe on 2020-03-13 19:07
+
+soft_name: java
+install_path: "/opt"
+
+soft_version: jdk1.8.0_171
+
+parent_home: "{{install_path}}/{{soft_name}}"
+soft_home: "{{parent_home}}/{{soft_version}}"
+
+soft_profile: "/etc/profile.d/java_home.sh"
+
+installer_java: install

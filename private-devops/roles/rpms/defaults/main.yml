@@ -1,0 +1,9 @@
+---
+# Created by azhe on 2020-03-13 19:07
+
+installer_rpm: install
+
+rpm_path: /home/{{ansible_user}}/.tmp/rpms
+
+soft: ['perl','expect','vim']
+

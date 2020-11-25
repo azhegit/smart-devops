@@ -1,0 +1,5 @@
+---
+# Created by azhe on 2020-03-13 19:07
+
+- include_tasks: '{{installer_rpm}}.yml'
+  name: '{{installer_rpm}} software'

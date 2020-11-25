@@ -1,0 +1,6 @@
+---
+# Created by azhe on 2020-03-13 19:07
+
+installer_hostname: install
+
+hostnames_file: "/etc/hosts"

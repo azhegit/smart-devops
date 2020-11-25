@@ -1,0 +1,82 @@
+---
+# Created by azhe on 2020-08-17 16:33
+
+- name: "{{installer_hadoop}} | 上传配置文件."
+  template:
+    dest: "{{ soft_home }}/etc/hadoop/{{item}}"
+    src: "{{item}}.j2"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+  with_items:
+    - core-site.xml
+    - hdfs-site.xml
+    - mapred-site.xml
+    - yarn-site.xml
+
+
+- name: '{{installer_hadoop}} | 停止所有yarn组件'
+  include_tasks: 'stop-yarn.yml'
+
+- name: '{{installer_hadoop}} | 停止所有dfs组件'
+  include_tasks: 'stop-dfs.yml'
+
+- name: "{{installer_hadoop}} | 上传自定义脚本."
+  template:
+    dest: "{{ soft_home }}/sbin/{{item}}"
+    src: "{{item}}"
+    mode: 0700
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+  with_items:
+    - custom_name_node_fomat.sh
+    - custom_zkfc_format.sh
+    - custom_secondname_node_fomat.sh
+
+- name: "{{installer_hadoop}} | 启动 journalnode "
+  shell: 'hadoop-daemon.sh start journalnode'
+  when: inventory_hostname in ( groups['hadoop_dfs_journalnode'] )
+  become: false
+
+
+- name: "{{installer_hadoop}} | 主节点namenode格式化  "
+  shell: 'custom_name_node_fomat.sh'
+  when: inventory_hostname ==  groups['hadoop_dfs_namenode'][0]
+  become: false
+
+- name: "{{installer_hadoop}} | 启动 主节点namenode "
+  shell: 'hadoop-daemon.sh start namenode'
+  when: inventory_hostname ==  groups['hadoop_dfs_namenode'][0]
+  become: false
+
+- name: "{{installer_hadoop}} | 从节点namenode格式化  "
+  shell: 'custom_secondname_node_fomat.sh'
+  when:  (groups['hadoop_dfs_namenode']| length>1) and (inventory_hostname ==  groups['hadoop_dfs_namenode'][1])
+  become: false
+
+- name: timed wait
+  pause: seconds=2
+
+- name: "{{installer_hadoop}} | 启动 从节点namenode "
+  shell: 'hadoop-daemon.sh start namenode'
+  when:  (groups['hadoop_dfs_namenode']| length>1) and (inventory_hostname ==  groups['hadoop_dfs_namenode'][1])
+  become: false
+
+- name: "{{installer_hadoop}} | namenode zkfc格式化"
+  shell: '{{item}}'
+  when: inventory_hostname in  groups['hadoop_dfs_namenode']
+  run_once: true
+  become: false
+  with_items:
+   - custom_zkfc_format.sh
+
+- name: '{{installer_hadoop}} | 停止所有yarn组件'
+  include_tasks: 'stop-yarn.yml'
+
+- name: '{{installer_hadoop}} | 停止所有dfs组件'
+  include_tasks: 'stop-dfs.yml'
+
+- name: '{{installer_hadoop}} | 启动所有dfs组件'
+  include_tasks: 'start-dfs.yml'
+
+- name: '{{installer_hadoop}} | 启动所有yarn组件'
+  include_tasks: 'start-yarn.yml'

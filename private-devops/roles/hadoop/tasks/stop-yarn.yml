@@ -1,0 +1,20 @@
+---
+# Created by azhe on 2020-09-15 11:34
+
+- name: "{{installer_hadoop}} | 停止 resourcemanager "
+  shell: yarn-daemon.sh stop resourcemanager
+  when: inventory_hostname in ( groups['hadoop_yarn_rm'] )
+  become: false
+  ignore_errors:  yes
+
+- name: "{{installer_hadoop}} | 停止 nodemanager "
+  shell: yarn-daemon.sh stop nodemanager
+  when: inventory_hostname in ( groups['hadoop_yarn_nm'] )
+  become: false
+  ignore_errors:  yes
+
+- name: "{{installer_hadoop}} | 停止 historyserver "
+  shell: mr-jobhistory-daemon.sh stop historyserver
+  when: inventory_hostname == groups['hadoop_yarn_jobhistory'][0]
+  become: false
+  ignore_errors:  yes

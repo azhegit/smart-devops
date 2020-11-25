@@ -1,0 +1,9 @@
+---
+# author: wzq
+
+- name: 检查 {{ path }} 目录是否存在
+  stat: path={{ path }}
+  register: java_parent_home_result
+
+
+- debug: var=result.stderr_lines

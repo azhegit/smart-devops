@@ -1,0 +1,35 @@
+# kafka集群信息，执行脚本的环境变量
+KAFKA_HOSTS=({% for host in groups['kafka'] %}{{ host }}{% if not loop.last %} {% endif %}{% endfor %})
+ZK_HOSTS=({% for host in groups['zookeeper'] %}{{ host }}{% if not loop.last %} {% endif %}{% endfor %})
+KAFKA_PORT={{ soft_port }}
+ZK_PORT=2181
+KAFKA_MANAGER_HOST=({% if groups['kafka-manager'] is defined %}{% for host in groups['kafka-manager'] %}{{ host }}{% if not loop.last %} {% endif %}{% endfor %}{% endif %})
+MIRROR_MAKER_HOST=({% if groups['mirror-maker'] is defined %}{% for host in groups['mirror-maker'] %}{{ host }}{% if not loop.last %} {% endif %}{% endfor %}{% else %}{{ groups['kafka'][0] }}{% endif %})
+
+# mirror_maker配置
+MIRROR_WHITE_LIST="mirror1|mirror2"
+MIRROR_HANGER_ARGS="mirror1->mirror1,mirror2|mirror2->mirror2"
+
+# export配置
+NODE_EXPORT_HOST=({% for host in groups['all'] %}{{ host }}{% if not loop.last %} {% endif %}{% endfor %})
+
+{% set kafka_export_hosts=[] %}
+{% if groups['kafka_exporter'] is defined  and groups['kafka_exporter'][0] is defined %}{% for host in groups['kafka_exporter'] %}
+    {{ kafka_export_hosts.append(host) }}
+{% endfor %}
+{% else %}
+    {{ kafka_export_hosts.append(groups['kafka'][0]) }}
+{% endif %}
+
+# kafka SASL 设置
+{% for host in kafka_export_hosts %}
+{% set export_host=hostvars[host].inventory_hostname |replace('-','_') %}
+{{ export_host }}_SASL_ENABLED={{ sasl_enable }}
+{% if  sasl_enable == 'true' %}
+{{ export_host }}_SASL_USERNAME={{ sasl_user }}
+{{ export_host }}_SASL_PASSWD={{ sasl_password }}
+{{ export_host }}_SASL_MECHANISM={{ sasl_mechanism }}
+{% endif %}
+{% endfor %}
+
+KAFKA_EXPORT_HOST=({{ kafka_export_hosts| join(' ') }})

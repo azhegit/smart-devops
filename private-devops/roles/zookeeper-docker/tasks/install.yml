@@ -1,0 +1,64 @@
+---
+# Created by azhe on 2020-08-19 16:37
+
+- name: "{{installer_zookeeper_docker}} | 创建 {{image_home}} 目录"
+  file:
+    path: "{{ image_home }}"
+    state: directory
+    mode: 0755
+    owner: '{{ansible_user}}'
+    group: '{{ansible_user}}'
+
+
+- name: "{{installer_zookeeper_docker}} | 准备 {{soft_name}} 镜像"
+  copy:
+    src: '{{soft_basic_path}}/{{soft_file}}'
+    dest: "{{image_home}}"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0755
+
+- name: "{{installer_zookeeper_docker}} | 导入镜像"
+  shell: 'docker load < {{image_home}}/{{soft_file}}'
+
+- name: "{{installer_zookeeper_docker}} | 创建 {{soft_home}} 目录"
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+  with_items:
+    - "{{soft_home}}"
+    - "{{ soft_home }}/docker_bin"
+
+- name: "{{installer_zookeeper_docker}} | 上传启动脚本."
+  template:
+    dest: "{{ soft_home }}/docker_bin/{{item}}"
+    mode: 0700
+    src: "{{item}}.j2"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+  with_items:
+    - start-zookeeper.sh
+    - stop-zookeeper.sh
+
+- name: "{{installer_zookeeper_docker}} | 配置 {{soft_name}} 环境,环境变量写入{{soft_profile}}"
+  template:
+    src: soft_profile.sh.j2
+    dest: '{{soft_profile}}'
+    mode: 0644
+
+- name: "{{installer_zookeeper_docker}} | 启动{{soft_name}} "
+  shell: 'start-zookeeper.sh'
+  become: false
+
+- name: timed wait
+  pause: seconds=5
+
+- name: "{{installer_zookeeper_docker}} | {{ soft_name }} status"
+  command: 'docker exec -it zk zkServer.sh status'
+  register: result
+  changed_when: false
+  ignore_errors: True
+
+- debug: var=result.stdout_lines

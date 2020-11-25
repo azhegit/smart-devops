@@ -1,0 +1,86 @@
+<configuration>
+
+    <property>
+        <!-- 为namenode集群定义一个services name -->
+        <name>dfs.nameservices</name>
+        <value>{{ dfs_nameservices }}</value>
+    </property>
+
+    <!-- nameservice 包含哪些namenode，为各个namenode起名 -->
+    <property>
+        <name>dfs.ha.namenodes.{{ dfs_nameservices }}</name>
+        <value>{% for host in groups['hadoop_dfs_namenode'] %}namenode{{ loop.index }}{% if not loop.last %},{% endif %}{% endfor %}</value>
+    </property>
+
+    {% for host in groups['hadoop_dfs_namenode'] %}
+        <!-- 为namenode的rpc地址和端口号，rpc用来和datanode通讯 -->
+        <property>
+            <name>dfs.namenode.rpc-address.{{ dfs_nameservices }}.namenode{{ loop.index }}</name>
+            <value>{{ host }}:{{ namenode_rpc_port|default(9000) }}</value>
+        </property>
+
+        <!-- 为namenode的http地址和端口号，用来和web客户端通讯 -->
+        <property>
+            <name>dfs.namenode.http-address.{{ dfs_nameservices }}.namenode{{ loop.index }}</name>
+            <value>{{ host }}:{{ namenode_http_port|default(50070) }}</value>
+        </property>
+    {% endfor %}
+
+    <!-- namenode间用于共享编辑日志的journal节点列表 -->
+    <property>
+        <name>dfs.namenode.shared.edits.dir</name>
+        <value>qjournal://{% for host in groups['hadoop_dfs_journalnode'] %}{{ host }}:{{ journalnode_port|default(8485)}}{% if not loop.last %};{% endif %}{% endfor %}/{{ dfs_nameservices }}</value>
+    </property>
+
+    <property>
+        <!--ZKFC来监听哪个NameNode服务-->
+        <name>dfs.client.failover.proxy.provider.{{ dfs_nameservices }}</name>
+        <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+    </property>
+
+
+    <!-- 一旦需要NameNode切换，使用ssh方式进行操作 -->
+    <property>
+        <name>dfs.ha.fencing.methods</name>
+        <value>sshfence</value>
+    </property>
+
+    <property>
+        <name>dfs.ha.fencing.ssh.private-key-files</name>
+        <value>/home/{{ ansible_ssh_user }}/.ssh/id_rsa</value>
+    </property>
+
+    <!-- journalnode 上用于存放edits日志的目录 -->
+    <property>
+        <name>dfs.journalnode.edits.dir</name>
+        <value>{{ hadoop_data_home }}/dfs/jn</value>
+    </property>
+
+    <property>
+        <!--自动故障切换配置-->
+        <name>dfs.ha.automatic-failover.enabled</name>
+        <value>true</value>
+    </property>
+
+    <!-- datanode　控制端口，默认50010 -->
+    <property>
+        <name>dfs.datanode.address</name>
+        <value>{{ inventory_hostname }}:{{ datanode_address |default(50010) }}</value>
+    </property>
+    <!--  datanode的HTTP服务器和端口，默认50075	 -->
+    <property>
+        <name>dfs.datanode.http.address</name>
+        <value>{{ inventory_hostname }}:{{ datanode_http_address |default(50075) }}</value>
+    </property>
+    <!--  datanode的RPC服务器地址和端口 默认50020 -->
+    <property>
+        <name>dfs.datanode.ipc.address</name>
+        <value>{{ inventory_hostname }}:{{ datanode_ipc_address|default(50020) }}</value>
+    </property>
+
+    <!-- 关闭权限验证 -->
+    <property>
+        <name>dfs.permissions.enabled</name>
+        <value>false</value>
+    </property>
+</configuration>

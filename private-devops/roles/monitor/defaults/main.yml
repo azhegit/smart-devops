@@ -1,0 +1,25 @@
+---
+# Created by azhe on 2020-08-19 16:37
+
+soft_name: monitor
+install_path: "/opt"
+
+bash_path: "/usr/bin"
+
+soft_home: "{{install_path}}/{{soft_name}}"
+soft_profile: "/etc/profile.d/monitor_home.sh"
+
+config_path: "{{soft_home}}/config"
+
+
+kafka_exporter_path: "{{bash_path}}/kafka_exporter-master"
+
+
+prometheus_port: 9090
+prometheus_data_path: "{{soft_home}}/data/prometheus"
+grafana_data_path: "{{soft_home}}/data/grafana"
+node_exporter_port: 9100
+kafka_exporter_port: 9308
+
+
+installer_monitor: install

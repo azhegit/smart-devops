@@ -1,0 +1,4 @@
+---
+# Created by azhe on 2020-08-19 16:37
+- include_tasks: '{{installer_zookeeper_docker}}.yml'
+  name: '{{installer_zookeeper_docker}} software'

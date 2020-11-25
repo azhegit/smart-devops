@@ -1,0 +1,13 @@
+<configuration>
+    <!-- 指定mr框架为yarn方式 -->
+    <property>
+        <name>mapreduce.framework.name</name>
+        <value>yarn</value>
+    </property>
+       <!--  shuffle句柄的HTTP端口号。为map输出结果服务，但不是用户可访问的Web UI。该属性在mapred-site.xml文件中设置。 默认 13562 -->
+    <property>
+        <name>mapreduce.shuffle.port</name>
+        <value>{{ mapreduce_shuffle_port|default(13562) }}</value>
+    </property>
+
+</configuration>

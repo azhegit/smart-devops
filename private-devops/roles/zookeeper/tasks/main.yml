@@ -1,0 +1,5 @@
+---
+# Created by azhe on 2020-08-14 20:55
+
+- include_tasks: '{{installer_zookeeper}}.yml'
+  name: '{{installer_zookeeper}} software'

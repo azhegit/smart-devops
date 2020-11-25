@@ -1,0 +1,26 @@
+---
+# Created by azhe on 2020-09-15 11:34
+
+- name: "{{installer_hadoop}} | 停止 namenode "
+  shell: hadoop-daemon.sh stop namenode
+  when: inventory_hostname in ( groups['hadoop_dfs_namenode'] )
+  become: false
+  ignore_errors:  yes
+
+- name: "{{installer_hadoop}} | 停止 datanode "
+  shell: hadoop-daemon.sh stop datanode
+  when: inventory_hostname in ( groups['hadoop_dfs_datanode'] )
+  become: false
+  ignore_errors:  yes
+
+- name: "{{installer_hadoop}} | 停止 journalnode "
+  shell: hadoop-daemon.sh stop journalnode
+  when: inventory_hostname in ( groups['hadoop_dfs_journalnode'] )
+  become: false
+  ignore_errors:  yes
+
+- name: "{{installer_hadoop}} | 停止 zkfc "
+  shell: hadoop-daemon.sh stop zkfc
+  when: inventory_hostname in ( groups['hadoop_dfs_namenode'] )
+  become: false
+  ignore_errors:  yes

@@ -1,0 +1,9 @@
+---
+# Created by azhe on 2020-08-14 20:55
+
+bash_path: "/usr/bin"
+
+installer_ssh: install
+
+ssh_known_hosts_command: "ssh-keyscan -t ecdsa-sha2-nistp256 -T 10"
+ssh_known_hosts_file: "~/.ssh/known_hosts"

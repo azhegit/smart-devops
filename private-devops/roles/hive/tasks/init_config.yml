@@ -1,0 +1,56 @@
+---
+# Created by azhe on 2020-08-17 16:33
+
+- name: "{{installer_hive}} | 上传配置文件."
+  template:
+    dest: "{{ soft_home }}/conf/{{item}}"
+    src: "{{item}}.j2"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+  with_items:
+    - hive-site.xml
+
+- name: "{{installer_hive}} | 准备 mysql驱动包 ,{{mysql_driver_path}}路径在：{{soft_home}}/bin"
+  copy:
+    src: '{{mysql_driver_path}}'
+    dest: "{{soft_home}}/lib"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+
+- name: "{{installer_hive}} | 初始化MySQL中的hive库 "
+  shell: 'schematool -dbType mysql -initSchema'
+  ignore_errors:  yes
+  become: false
+
+
+- name: "{{installer_hive}} | start metastore"
+  shell: "nohup hive --service metastore >> $HIVE_HOME/hivemetastore.log 2>&1 &"
+  become: false
+
+- name: "{{installer_hive}} | start metastore"
+  shell: "nohup hive --service hiveserver2 >>$HIVE_HOME/hiveserver2.log 2>&1 &"
+  become: false
+
+- name: "{{installer_hive}} | 上传配置文件."
+  template:
+    dest: "{{ soft_home }}/hive-test.txt"
+    src: "hive-test.txt"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+
+- name: timed wait
+  pause: seconds=5
+
+- name: "{{installer_hive}} | hive 测试脚本，需要进行1分钟左右"
+  shell: "hive -e \"
+create database  if not exists test;
+create table if not exists test.records(year string,temperature int,quality int) row format delimited fields terminated by ',';
+load data local inpath '{{ soft_home }}/hive-test.txt' overwrite into table test.records;
+select * from test.records;
+select year, max(temperature) from test.records group by year;
+\""
+  become: false
+  register: result
+
+- name: "{{installer_hive}} | hive 测试脚本结果"
+  debug: var=result

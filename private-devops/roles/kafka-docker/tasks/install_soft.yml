@@ -1,0 +1,73 @@
+---
+# Created by azhe on 2020-08-19 16:37
+
+- name: "{{installer_kafka_docker}} | 创建 {{image_home}} 目录"
+  file:
+    path: "{{ image_home }}"
+    state: directory
+    mode: 0755
+    owner: '{{ansible_user}}'
+    group: '{{ansible_user}}'
+
+- name: "{{installer_kafka_docker}} | 准备 {{soft_name}} 安装目录及脚本"
+  copy:
+    src: '{{soft_basic_path}}/{{soft_file}}'
+    dest: "{{image_home}}"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+    mode: 0755
+
+- name: "{{installer_kafka_docker}} | 导入镜像"
+  shell: 'docker load < {{image_home}}/{{soft_file}}'
+
+- name: "{{installer_kafka_docker}} | 创建 {{soft_home}} 目录"
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+  with_items:
+    - "{{soft_home}}"
+    - "{{ soft_home }}/docker_bin"
+
+- name: "{{installer_kafka_docker}} | 上传启动脚本."
+  template:
+    dest: "{{ soft_home }}/docker_bin/{{item}}"
+    mode: 0700
+    src: "{{item}}.j2"
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+  with_items:
+    - start-kafka.sh
+    - stop-kafka.sh
+    - kafka-server-start.sh
+
+- name: "{{installer_kafka_docker}} | 配置 {{soft_name}} 环境,环境变量写入{{soft_profile}}"
+  template:
+    src: soft_profile.sh.j2
+    dest: '{{soft_profile}}'
+    mode: 0644
+
+- name: "{{installer_kafka_docker}} | 启动{{soft_name}} "
+  shell: 'start-kafka.sh'
+  become: false
+
+- name: "{{installer_kafka_docker}} | Wait for {{soft_name}} port {{ soft_port }} is OPEN."
+  wait_for: "port={{ soft_port }} state=started"
+
+- name: "{{installer_kafka}} | 查询{{soft_name}} 测试脚本 pid"
+  shell: "ps -aux | grep ProducerPerformance |grep -v grep| awk '{print $2}'"
+  register: perf_pid_result
+  ignore_errors: True
+  run_once: true
+
+- debug: var=perf_pid_result
+  run_once: true
+
+- name: "{{installer_kafka}} | 创建 test topic,启动 消费者脚本"
+  shell: "kafka-topic-create.sh test 1 1;sleep 3;kafka-perf-test.sh test 9000 5;sleep 5; nohup consumer-test.sh >/dev/null 2>&1 &"
+  become: false
+  run_once: true
+  when: perf_pid_result.stdout_lines| length<1
+
+

@@ -1,0 +1,44 @@
+---
+# Created by azhe on 2020-08-17 16:33
+
+- name: "{{installer_hive}} | 创建 {{parent_home}} 目录"
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: '{{ansible_user}}'
+    group: '{{ansible_user}}'
+  with_items:
+   - "{{parent_home}}"
+
+- name: "{{installer_hive}} | 检查 {{ soft_name }} 安装目录 {{soft_home}} 是否存在"
+  stat: path={{ soft_home }}
+  register: parent_home_result
+
+- block:
+  - name: "{{installer_hive}} | 安装{{soft_name}}"
+    unarchive:
+      src: "{{local_file_path}}"
+      dest: "{{parent_home}}"
+      owner: "{{ ansible_ssh_user }}"
+      group: "{{ ansible_ssh_user }}"
+    async: 0
+    poll: 30
+
+#  - name: wait
+#    pause: seconds=10
+
+  - name: "{{installer_hive}} | 修改目录权限 {{ soft_home }}"
+    file:
+      path: "{{ soft_home }}"
+      state: directory
+      owner: "{{ ansible_ssh_user }}"
+      group: "{{ ansible_ssh_user }}"
+      recurse: yes
+
+  when: not parent_home_result.stat.exists
+#
+#- name: "{{installer_hive}} | 配置 {{soft_name}} 环境,环境变量写入{{soft_profile}}"
+#  template:
+#    src: soft_profile.sh.j2
+#    dest: '{{soft_profile}}'
+#    mode: 0644

@@ -1,0 +1,30 @@
+---
+# Created by azhe on 2020-08-19 16:37
+
+- name: "{{installer_kafka}} | 查询 测试发送端 pid"
+  shell: "ps -aux | grep {{item}} |grep -v grep| awk '{print $2}' | sudo xargs kill -9"
+  run_once: true
+  ignore_errors: True
+  with_items:
+    - 'ProducerPerformance'
+    - 'ConsoleConsumer'
+    - 'consumer-test.sh'
+
+- name: "{{installer_kafka_docker}} | 停止{{soft_name}} "
+  shell: 'stop-kafka.sh'
+  become: false
+  ignore_errors: True
+
+- name: "{{installer_kafka_docker}} | 删除 {{soft_home}} 相关 目录"
+  file: path={{item}} state=absent
+  with_items:
+   - "{{soft_home}}"
+   - "{{kafka_tools_path}}"
+#   - "{{image_home}}/{{soft_file}}"
+
+
+- name: "{{installer_kafka_docker}} | 删除 环境变量 {{soft_profile}},{{kafka_tools_profile}}"
+  file: path={{item}} state=absent
+  with_items:
+   - "{{soft_profile}}"
+   - "{{kafka_tools_profile}}"

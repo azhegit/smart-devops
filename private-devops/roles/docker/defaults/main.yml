@@ -1,0 +1,22 @@
+---
+# Created by azhe on 2020-08-18 18:55
+
+soft_name: docker
+soft_pid_name: dockerd
+tmp_path: "/tmp"
+install_path: "/opt"
+
+soft_version: jdk1.8.0_171
+
+parent_home: "{{tmp_path}}/{{soft_name}}"
+bash_path: "/usr/bin"
+
+soft_home: "{{install_path}}/{{soft_name}}"
+image_home: "{{install_path}}/images"
+
+
+soft_profile: "/usr/lib/systemd/system/docker.service"
+soft_file: "docker-18.03.1-ce.tgz"
+
+
+installer_docker: install

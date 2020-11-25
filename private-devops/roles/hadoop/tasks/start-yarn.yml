@@ -1,0 +1,17 @@
+---
+# Created by azhe on 2020-09-15 11:34
+
+- name: "{{installer_hadoop}} | 启动 resourcemanager "
+  shell: yarn-daemon.sh start resourcemanager
+  when: inventory_hostname in ( groups['hadoop_yarn_rm'] )
+  become: false
+
+- name: "{{installer_hadoop}} | 启动 nodemanager "
+  shell: yarn-daemon.sh start nodemanager
+  when: inventory_hostname in ( groups['hadoop_yarn_nm'] )
+  become: false
+
+- name: "{{installer_hadoop}} | 启动 historyserver "
+  shell: mr-jobhistory-daemon.sh start historyserver
+  when: inventory_hostname == groups['hadoop_yarn_jobhistory'][0]
+  become: false

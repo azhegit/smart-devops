@@ -1,0 +1,36 @@
+---
+# author: wzq
+
+- name: "{{installer_mysql}} | 停止 {{soft_name}}"
+  service:
+    name: 'mysqld'
+    state: stopped
+    enabled: no
+  ignore_errors:  yes
+
+
+- name: "{{installer_mysql}} | 卸载 {{soft}}"
+  shell: "sh {{rpm_path}}/uninstall-rpms.sh {{rpm_path}}/{{item}}"
+  with_items: "{{soft}}"
+  register: install_soft_result
+  ignore_errors: True
+
+- name: "{{installer_mysql}} | 卸载 {{soft}} 结果"
+  debug:
+    msg: "{{item.stdout_lines}}"
+  loop: "{{install_soft_result.results}}"
+  loop_control:
+    label: " {{item.item}}"
+
+- name: "{{installer_monitor}} | 删除 相关目录"
+  file: path={{item}} state=absent
+  with_items:
+    - /var/lib/mysql
+    - /var/log/mysqld.log
+    - /usr/share/mysql
+    - "~/.my.cnf"
+    - "~/.mysql_history"
+
+
+
+

@@ -1,0 +1,4 @@
+---
+# author: wzq
+- include_tasks: '{{installer_mysql}}.yml'
+  name: '{{installer_mysql}} software'

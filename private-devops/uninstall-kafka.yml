@@ -1,0 +1,53 @@
+- name: monitor
+  hosts: monitor
+  become: true
+  roles:
+    - role: monitor
+
+- name: docker
+  hosts: docker
+  become: true
+  roles:
+    - role: docker
+
+- name: kafka-manager
+  hosts: kafka-manager
+  become: true
+  roles:
+    - role: kafka-manager
+
+- name: kafka
+  hosts: kafka
+  become: true
+  roles:
+    - role: kafka
+
+- name: zookeeper
+  hosts: zookeeper
+  become: true
+  roles:
+    - role: zookeeper
+
+- name: rpm
+  hosts: rpm
+  become: true
+  roles:
+    - role: rpms
+
+- name: jdk1.8
+  hosts: java
+  become: true
+  roles:
+    - role: java
+
+- name: ssh
+  hosts: ssh
+  become: true
+  roles:
+    - role: ssh
+
+- name: hostname
+  hosts: hostname
+  become: true
+  roles:
+    - role: hostname

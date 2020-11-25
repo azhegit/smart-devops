@@ -1,0 +1,50 @@
+---
+# Created by azhe on 2020-08-14 20:55
+
+#删除ssh-key
+- name: "{{installer_ssh}} | 获取执行本机 ssh key"
+  authorized_key:
+    user: "{{ansible_user}}"
+    key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+    state: absent
+  register: result
+  ignore_errors: yes
+
+- name: "{{installer_ssh}} | 远端机器获取 public ssh keys."
+  shell: cat ~/.ssh/id_rsa.pub
+  register: ssh_keys
+  become: false
+
+- name: "{{installer_ssh}} | 删除远端机器的 ssh key"
+  authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ hostvars[item].ssh_keys.stdout }}"
+    state: absent
+  with_items: "{{ groups.all }}"
+  become: false
+
+- name: "{{installer_ssh}} | 获取远端机器 public key"
+  shell: '{{ ssh_known_hosts_command}} {{ item }} | grep -v \#'
+  with_items: "{{   groups.all  }}"
+  register: results
+  connection: local
+  become: false
+  run_once: true
+
+- name: "{{installer_ssh}} | 删除本机 {{ssh_known_hosts_file}} 中 know_hosts "
+  lineinfile:
+    dest: '{{ssh_known_hosts_file}}'
+    line: "{{item.stdout}}"
+    state: absent
+  with_items: "{{results.results}}"
+  connection: local
+  become: false
+  run_once: true
+
+- name: "{{installer_ssh}} | 删除远端机器 {{ssh_known_hosts_file}} 中 know_hosts "
+  lineinfile:
+    dest: '{{ssh_known_hosts_file}}'
+    line: "{{item.stdout}}"
+    state: absent
+  with_items: "{{results.results}}"
+  become: false

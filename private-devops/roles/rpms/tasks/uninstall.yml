@@ -1,0 +1,29 @@
+---
+# Created by azhe on 2020-03-13 19:07
+
+
+- name: 卸载 {{soft}}
+  shell: "sh {{rpm_path}}/uninstall-rpms.sh {{rpm_path}}/{{item}}"
+  with_items: "{{soft}}"
+  register: install_soft_result
+  ignore_errors: True
+
+
+- name: 卸载 {{soft}} 结果
+  debug:
+    msg: "{{item.stdout_lines}}"
+  loop: "{{install_soft_result.results}}"
+  loop_control:
+    label: " {{item.item}}"
+
+- name: 检查 "{{rpm_path}}" 目录是否存在
+  stat: path="{{rpm_path}}"
+  register: soft_path_result
+
+- name: 删除 {{rpm_path}} 文件
+  become: false
+  file: path="{{rpm_path}}" state=absent
+  when: soft_path_result.stat.exists
+
+
+

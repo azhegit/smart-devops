@@ -1,0 +1,8 @@
+---
+# Created by azhe on 2020-08-19 16:37
+
+- name: "{{installer_kafka}} | 上传kafka-tools"
+  include_tasks: install_kafka_tools.yml
+
+- include_tasks: 'install_soft.yml'
+  name: '{{installer_kafka}} | 安装 {{soft_name}} 脚本'

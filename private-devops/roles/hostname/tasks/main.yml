@@ -1,0 +1,6 @@
+---
+# Created by azhe on 2020-03-13 19:07
+# 执行脚本选择器
+
+- include_tasks: '{{installer_hostname}}.yml'
+  name: '{{installer_hostname}} | hostname 修改'

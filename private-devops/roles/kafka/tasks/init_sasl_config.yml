@@ -1,0 +1,105 @@
+---
+# Created by azhe on 2020-08-17 11:20
+
+
+#- debug: "msg=hello"
+
+- name: "{{installer_kafka}} | 创建sasl用户}"
+  shell: "kafka-sasl-user-alter.sh {{sasl_user}} {{sasl_password}}"
+  become: false
+  run_once: true
+
+- name: "{{installer_kafka}} | 配置kafka sasl server配置"
+  template:
+    dest: "{{ soft_home }}/config/kafka_server_jaas.conf"
+    src: sasl/kafka_server_jaas.conf.j2
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+
+- name: "{{installer_kafka}} | 配置kafka sasl client配置"
+  template:
+    dest: "{{ soft_home }}/config/kafka_client_jaas.conf"
+    src: sasl/kafka_client_jaas.conf.j2
+    owner: "{{ ansible_ssh_user }}"
+    group: "{{ ansible_ssh_user }}"
+
+- name: "{{installer_kafka}} | 启动脚本 {{soft_home}}/bin/{{server_start_bash}} 添加校验 "
+  lineinfile:
+    dest: '{{soft_home}}/bin/{{server_start_bash}}'
+    insertafter: "esac"
+    line: 'if [ "x$KAFKA_OPTS"  ]; then'
+    state: present
+  
+
+- name: "{{installer_kafka}} | 启动脚本 {{soft_home}}/bin/{{server_start_bash}} 添加校验 "
+  lineinfile:
+    dest: '{{soft_home}}/bin/{{server_start_bash}}'
+    insertafter: 'KAFKA_OPTS'
+    line: '  export KAFKA_OPTS="-Djava.security.auth.login.config=$KAFKA_HOME/config/kafka_server_jaas.conf"'
+    state: present
+
+- name: "{{installer_kafka}} | 启动脚本 {{soft_home}}/bin/{{server_start_bash}} 添加校验 "
+  lineinfile:
+    dest: '{{soft_home}}/bin/{{server_start_bash}}'
+    insertafter: '  export KAFKA_OPTS="-Djava'
+    line: 'fi'
+    state: present
+
+- name: "{{installer_kafka}} | 生产者/消费者客户端配置文件添加校验 "
+  lineinfile:
+    dest: '{{soft_home}}/config/{{item}}'
+    insertafter: "#"
+    line: 'security.protocol=SASL_PLAINTEXT'
+    state: present
+  with_items:
+    - '{{producer_properties}}'
+    - '{{consumer_properties}}'
+
+- name: "{{installer_kafka}} | 生产者/消费者客户端配置文件添加校验 "
+  lineinfile:
+    dest: '{{soft_home}}/config/{{item}}'
+    insertafter: 'SASL_PLAINTEXT'
+    line: 'sasl.mechanism=SCRAM-SHA-256'
+    state: present
+  with_items:
+    - '{{producer_properties}}'
+    - '{{consumer_properties}}'
+
+- name: "{{installer_kafka}} | 生产者/消费者客户端脚本添加校验 "
+  lineinfile:
+    dest: '{{soft_home}}/bin/{{item}}'
+    insertafter: "# limitations"
+    line: 'if [ "x$KAFKA_OPTS"  ]; then'
+    state: present
+  with_items:
+    - '{{producer_bash}}'
+    - '{{consumer_bash}}'
+    - '{{perf_test_bash}}'
+
+- name: "{{installer_kafka}} | 生产者/消费者客户端脚本添加校验 "
+  lineinfile:
+    dest: '{{soft_home}}/bin/{{item}}'
+    insertafter: 'KAFKA_OPTS'
+    line: '  export KAFKA_OPTS="-Djava.security.auth.login.config=$KAFKA_HOME/config/kafka_client_jaas.conf"'
+    state: present
+  with_items:
+    - '{{producer_bash}}'
+    - '{{consumer_bash}}'
+    - '{{perf_test_bash}}'
+
+- name: "{{installer_kafka}} | 生产者/消费者客户端脚本添加校验 "
+  lineinfile:
+    dest: '{{soft_home}}/bin/{{item}}'
+    insertafter: '  export KAFKA_OPTS="-Djava'
+    line: 'fi'
+    state: present
+  with_items:
+    - '{{producer_bash}}'
+    - '{{consumer_bash}}'
+    - '{{perf_test_bash}}'
+
+
+
+
+
+

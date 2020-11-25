@@ -1,0 +1,36 @@
+---
+# Created by azhe on 2020-08-19 16:37
+
+soft_name: kafka-docker
+install_path: "/opt"
+
+soft_version: 2.11-1.1.1
+
+image_home: "{{install_path}}/images"
+soft_file: "{{soft_name}}-{{soft_version}}.tar.gz"
+soft_basic_path: "{{basic_files_path}}/{{soft_name}}/{{soft_version}}"
+soft_port: 9092
+soft_home: "{{install_path}}/{{soft_name}}"
+soft_profile: "/etc/profile.d/{{soft_name}}_home.sh"
+
+
+#kafka工具
+kafka_tools_name: kafka_tools_sasl_docker
+kafka_tools_path: "{{install_path}}/{{kafka_tools_name}}"
+kafka_tools_profile: "/etc/profile.d/kafka_tools_home.sh"
+
+#kafka权限
+
+sasl_enable: 'false'
+sasl_user: "admin"
+sasl_password: "adminpwd"
+sasl_mechanism: 'scram-sha256'
+server_start_bash: kafka-server-start.sh
+producer_bash: kafka-console-producer.sh
+consumer_bash: kafka-console-consumer.sh
+perf_test_bash: kafka-producer-perf-test.sh
+producer_properties: producer.properties
+consumer_properties: consumer.properties
+
+
+installer_kafka_docker: install
