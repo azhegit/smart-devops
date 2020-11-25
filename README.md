@@ -86,6 +86,7 @@ machines
 [ssh:children]
 machines
 
+
 [java]
 kafka-1
 kafka-2
