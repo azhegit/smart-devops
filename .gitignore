@@ -13,7 +13,7 @@
 *.tar
 *.rpm
 basic-files
-my-conf
+inventorys
 
 ### IntelliJ IDEA ###
 .idea
