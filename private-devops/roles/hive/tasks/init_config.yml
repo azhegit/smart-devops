@@ -41,7 +41,7 @@
 - name: timed wait
   pause: seconds=5
 
-- name: "{{installer_hive}} | hive 测试脚本，需要进行1分钟左右"
+- name: "{{installer_hive}} | hive 测试脚本，需要进行3分钟左右"
   shell: "hive -e \"
 create database  if not exists test;
 create table if not exists test.records(year string,temperature int,quality int) row format delimited fields terminated by ',';

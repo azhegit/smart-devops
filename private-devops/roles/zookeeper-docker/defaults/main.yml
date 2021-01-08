@@ -9,9 +9,9 @@ soft_version: 3.5.6
 image_home: "{{install_path}}/images"
 soft_file: "{{soft_name}}-{{soft_version}}.tar.gz"
 soft_basic_path: "{{basic_files_path}}/{{soft_name}}/{{soft_version}}"
-soft_client_port: 22181
-soft_connection_port: 22888
-soft_election_port: 23888
+soft_client_port: 2181
+soft_connection_port: 2888
+soft_election_port: 3888
 soft_home: "{{install_path}}/{{soft_name}}"
 soft_profile: "/etc/profile.d/{{soft_name}}_home.sh"
 

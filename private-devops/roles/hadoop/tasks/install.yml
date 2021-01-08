@@ -7,8 +7,8 @@
 - include_tasks: 'init_config.yml'
   name: '{{installer_hadoop}} | 初始化配置'
 
-#- include_tasks: 'stop-yarn.yml'
-#  name: '{{installer_hadoop}} | 停止yarn'
-#
-#- include_tasks: 'start-yarn.yml'
-#  name: '{{installer_hadoop}} | 启动yarn'
+- include_tasks: 'stop-yarn.yml'
+  name: '{{installer_hadoop}} | 停止yarn'
+
+- include_tasks: 'start-yarn.yml'
+  name: '{{installer_hadoop}} | 启动yarn'

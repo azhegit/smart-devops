@@ -7,11 +7,14 @@
 - name: '{{installer_hadoop}} | 停止所有dfs组件'
   include_tasks: 'stop-dfs.yml'
 
-- name: "{{installer_hadoop}} | 删除 {{hadoop_data_home}} 目录"
-  file: path={{hadoop_data_home}} state=absent
+#- name: "{{installer_hadoop}} | 删除 {{hadoop_data_home}} 目录"
+#  file: path={{item}} state=absent
+#  with_items:
+#    - "{{hadoop_data_home}}"
+#    - "{{hadoop_yarn_logs_home}}"
 #
-#- name: "{{installer_hadoop}} | 删除 {{parent_home}} 目录"
-#  file: path={{parent_home}} state=absent
+- name: "{{installer_hadoop}} | 删除 {{parent_home}} 目录"
+  file: path={{parent_home}} state=absent
 
 - name: "{{installer_hadoop}} | 检查{{soft_profile}}环境变量是否存在"
   stat: path={{soft_profile}}

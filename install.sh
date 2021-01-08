@@ -22,10 +22,10 @@ fi
 
 if [ $# -eq 0 ] || [[ $1 =~ '-v' ]]; then
 echo default:install.ini install.yml
-ansible-playbook -i private-devops/inventory/install.ini private-devops/install.yml $1
+ansible-playbook -i inventorys/install.ini private-devops/install.yml $1
 else
-echo install-$1.ini install-$1.yml
-ansible-playbook -i private-devops/inventory/install-$1.ini private-devops/install-$1.yml $2
+echo install-$1.ini install.yml
+ansible-playbook -i inventorys/install-$1.ini private-devops/install.yml $2
 fi
 
 endtime=`date +'%Y-%m-%d %H:%M:%S'`

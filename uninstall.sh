@@ -4,10 +4,10 @@ core=`uname  -a`
 
 if [ $# -eq 0 ] || [[ $1 =~ '-v' ]]; then
 echo default:install.ini uninstall.ini uninstall.yml
-#ansible-playbook -i private-devops/inventory/install.ini -i private-devops/inventory/uninstall.ini private-devops/uninstall.yml $1
+ansible-playbook -i inventorys/install.ini -i private-devops/inventory/uninstall.ini private-devops/uninstall.yml $1
 else
-echo install-$1.ini uninstall.ini uninstall-$1.yml
-#ansible-playbook -i private-devops/inventory/install-$1.ini -i private-devops/inventory/uninstall.ini private-devops/uninstall-$1.yml $2
+echo install-$1.ini uninstall.ini uninstall.yml
+ansible-playbook -i inventorys/install-$1.ini -i private-devops/inventory/uninstall.ini private-devops/uninstall.yml $2
 fi
 
 mac="Darwin"

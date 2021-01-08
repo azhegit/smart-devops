@@ -36,9 +36,9 @@
       recurse: yes
 
   when: not parent_home_result.stat.exists
-#
-#- name: "{{installer_hive}} | 配置 {{soft_name}} 环境,环境变量写入{{soft_profile}}"
-#  template:
-#    src: soft_profile.sh.j2
-#    dest: '{{soft_profile}}'
-#    mode: 0644
+
+- name: "{{installer_hive}} | 配置 {{soft_name}} 环境,环境变量写入{{soft_profile}}"
+  template:
+    src: soft_profile.sh.j2
+    dest: '{{soft_profile}}'
+    mode: 0644

@@ -12,40 +12,42 @@ soft_home: "{{parent_home}}/{{soft_version}}"
 
 soft_profile: "/etc/profile.d/hadoop_home.sh"
 hadoop_data_home: "{{data_home}}/hadoop"
+hadoop_yarn_logs_home: "{{data_home}}/yarnlogs"
+
 data_home: /data
 
 #默认9000
-namenode_rpc_port: 8020
+#namenode_rpc_port: 8020
 #默认50700
 #namenode_http_port: 50700
 #默认：8485
 #journalnode_port: 18485
 
 #datanode控制端口，默认50010
-datanode_address: 50100
+#datanode_address: 50010
 
 #datanode HTTP服务器和端口，默认50075
-datanode_http_address: 50750
+#datanode_http_address: 50075
 
 #RPC服务器地址和端口 默认50020
-datanode_ipc_address: 50200
+#datanode_ipc_address: 50200
 
 #zk端口 默认2181
-zookeeper_client_port: 22181
+#zookeeper_client_port: 22181
 
 #yarn localizer IPC 默认 8040
-nodemanager_localizer_address: 18040
+#nodemanager_localizer_address: 18040
 #manager的端口 默认 8041
-nodemanager_address: 18041
+#nodemanager_address: 18041
 #HTTP服务器地址和端口 默认 8042
-nodemanager_webapp_address: 18042
+#nodemanager_webapp_address: 18042
 #shuffle句柄的HTTP端口号 默认 13562
-mapreduce_shuffle_port: 23562
+#mapreduce_shuffle_port: 23562
 
 #web ui端口, 默认 8088
-resourcemanager_webapp_address: 18088
+#resourcemanager_webapp_address: 18088
 
-yarn_pecent: 0.7
+yarn_pecent: 0.8
 
 dfs_nameservices: stream-hdfs
 

@@ -16,7 +16,7 @@ soft_home: "{{parent_home}}/apache-hive-{{soft_version}}-bin"
 
 soft_profile: "/etc/profile.d/hive_home.sh"
 
-mysql_hive_database: k8s_hive
+mysql_hive_database: hive
 
 
 installer_hive: install
